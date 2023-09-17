@@ -1,10 +1,11 @@
-package Handins.Project1_ParallelMergeSort;
+package Handins.Project1_ParallelMergeSort.experiments;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-public class ArrayHelpers {
+public class Helpers {
     
     public static Long[] GenerateArray(int size, Callable<Long> getNextLong) throws Exception  {
         Long[] array = new Long[size];
@@ -26,6 +27,15 @@ public class ArrayHelpers {
             array[i] = randomValue;
         }
         return array;
+    }
+
+    public static boolean IsSorted(List<Long> array) {
+        for(int i = 1; i < array.size(); i++) {
+            if(array.get(i-1) > array.get(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

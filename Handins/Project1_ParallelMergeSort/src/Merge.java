@@ -1,8 +1,10 @@
-package Handins.Project1_ParallelMergeSort;
+package Handins.Project1_ParallelMergeSort.src;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+
+import Handins.Project1_ParallelMergeSort.experiments.Helpers;
 
 public class Merge {
     public static void SequentialMerge(List<Long> array1, List<Long> array2, List<Long> output) {
@@ -16,8 +18,7 @@ public class Merge {
         }
     }
 
-
-    // based on "Work-Optimal Merging par-III.pdf page 13/20"
+    // based on "Work-Optimal Merging from par-III.pdf page 13/20"
     public static void SegMerge(List<Long> A, List<Long> B, List<Long> M, int p) {
         // A and B are sorted and contain unique elements
         // it works the best when A.size() <= B.size()
@@ -96,7 +97,7 @@ public class Merge {
 
     public static void main(String[] args) throws Exception {
         var random = new Random(69);
-        var randomUniqueArray = Arrays.asList(ArrayHelpers.GenerateUniqueArray(10, () -> random.nextLong(0, 100)));
+        var randomUniqueArray = Arrays.asList(Helpers.GenerateUniqueArray(10, () -> random.nextLong(0, 100)));
         var array1 = randomUniqueArray.subList(0, 1);
         array1.sort(Long::compareTo);
         var array2 = randomUniqueArray.subList(1, randomUniqueArray.size());
