@@ -1,10 +1,6 @@
 package Handins.Project1_ParallelMergeSort.src;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
-
-import Handins.Project1_ParallelMergeSort.experiments.Helpers;
 
 public class Merge {
     public static void SequentialMerge(List<Long> array1, List<Long> array2, List<Long> output) {
@@ -94,17 +90,4 @@ public class Merge {
         }
         return left;
     }
-
-    public static void main(String[] args) throws Exception {
-        var random = new Random(69);
-        var randomUniqueArray = Arrays.asList(Helpers.GenerateUniqueArray(10, () -> random.nextLong(0, 100)));
-        var array1 = randomUniqueArray.subList(0, 1);
-        array1.sort(Long::compareTo);
-        var array2 = randomUniqueArray.subList(1, randomUniqueArray.size());
-        array2.sort(Long::compareTo);
-
-        var output = Arrays.asList(new Long[randomUniqueArray.size()]);
-        SegMerge(array1, array2, output, 4);
-    }
-
 }
