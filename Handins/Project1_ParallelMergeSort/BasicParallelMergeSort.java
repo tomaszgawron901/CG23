@@ -31,6 +31,7 @@ public class BasicParallelMergeSort extends RecursiveTask<List<Long>> {
         // sublist does not create a new array
         // it creates a view of a portion of the array 
         // changing sub-array changes original array
+        // the benefit is that it does not allocate new memory
 
         var leftTask = new BasicParallelMergeSort(leftArray, leftScratch);
         var rightTask = new BasicParallelMergeSort(rightArray, rightScratch);
@@ -42,6 +43,7 @@ public class BasicParallelMergeSort extends RecursiveTask<List<Long>> {
         return this.array;
     }
 
+    // write elements from 'from' into 'to'
     private void Transfer(List<Long> from, List<Long> to) {
         for(int i = 0; i < from.size(); i++) {
             to.set(i, from.get(i));
