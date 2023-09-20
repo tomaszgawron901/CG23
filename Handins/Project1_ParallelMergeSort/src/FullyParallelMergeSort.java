@@ -7,25 +7,18 @@ import java.util.concurrent.RecursiveTask;
 
 // based on "Algorithm 1 from msort.pdf"
 // This implementation only uses a one-time allocated scratch space, instead of allocating scratch space at every recursion level
-public class ParallelMergeSort extends RecursiveTask<List<Long>> {
-
-    @FunctionalInterface
-    public interface MergeFunction {
-        void call(List<Long> array1, List<Long> array2, List<Long> output);
-    }
+public class FullyParallelMergeSort extends RecursiveTask<List<Long>> {
 
     private List<Long> array;
     private List<Long> scratch; // scratch space used for merging
-    private MergeFunction mergeFunction; // function used to merge two arrays
 
-    public ParallelMergeSort(List<Long> array, MergeFunction mergeFunction) {
-        this(array, Arrays.asList(new Long[array.size()]), mergeFunction);
+    public FullyParallelMergeSort(List<Long> array) {
+        this(array, Arrays.asList(new Long[array.size()]));
     }
 
-    private ParallelMergeSort(List<Long> array, List<Long> scratch, MergeFunction mergeFunction) {
+    private FullyParallelMergeSort(List<Long> array, List<Long> scratch ) {
         this.array = array;
         this.scratch = scratch;
-        this.mergeFunction = mergeFunction;
     }
 
     @Override
@@ -44,13 +37,16 @@ public class ParallelMergeSort extends RecursiveTask<List<Long>> {
         // changing sub-array changes original array
         // the benefit is that it does not allocate new memory
 
-        var leftTask = new ParallelMergeSort(leftArray, leftScratch, this.mergeFunction);
-        var rightTask = new ParallelMergeSort(rightArray, rightScratch, this.mergeFunction);
+        var leftTask = new FullyParallelMergeSort(leftArray, leftScratch);
+        var rightTask = new FullyParallelMergeSort(rightArray, rightScratch);
         invokeAll(leftTask, rightTask);
 
         Transfer(leftTask.join(), leftScratch);   // rewrite leftTask output (which is stored in this.array) into leftScratch
         Transfer(rightTask.join(), rightScratch); // same but with right side
-        this.mergeFunction.call(leftScratch, rightScratch, this.array); // and merge them into this.array
+        
+        var mergeTask = new SegMergeTask(leftScratch, rightScratch, this.array, 4);
+        mergeTask.fork();
+        mergeTask.join();
 
         return this.array;
     }
