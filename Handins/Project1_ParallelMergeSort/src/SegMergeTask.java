@@ -9,6 +9,9 @@ public class SegMergeTask extends ForkJoinTask<List<Long>> {
     private List<Long> M;
     private final int p;
 
+    private final int[] rankA;
+    private final int[] rankB;
+
     public SegMergeTask(List<Long> array1, List<Long> array2, List<Long> output, int p) {
         this.A = array1;
         this.B = array2;
@@ -20,6 +23,9 @@ public class SegMergeTask extends ForkJoinTask<List<Long>> {
         else {
             this.p = p;
         }
+
+        rankA = new int[p+1];
+        rankB = new int[p+1];
     }
 
     @Override
@@ -36,8 +42,6 @@ public class SegMergeTask extends ForkJoinTask<List<Long>> {
     protected boolean exec() {
         final int n = B.size();
 
-        int[] rankA = new int[p+1];
-        int[] rankB = new int[p+1];
         rankA[0] = 0;
         rankA[p] = A.size();
         rankB[0] = 0;

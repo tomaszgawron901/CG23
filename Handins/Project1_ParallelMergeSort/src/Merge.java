@@ -3,6 +3,9 @@ package Handins.Project1_ParallelMergeSort.src;
 import java.util.List;
 
 public class Merge {
+    /**
+     * time complexity: O(n); where n = output.size
+     */
     public static void SequentialMerge(List<Long> array1, List<Long> array2, List<Long> output) {
         int i1 = 0, i2 = 0;
         for (int i = 0; i < output.size(); i++) {
