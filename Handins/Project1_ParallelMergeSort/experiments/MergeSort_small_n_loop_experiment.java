@@ -16,9 +16,9 @@ public class MergeSort_small_n_loop_experiment {
         System.out.println("step;array_size;total_time;average_time");
 
         int n = 1;
+        ForkJoinPool pool = new ForkJoinPool(cores);
         for(int step=1; step<=cores; step++) {
             n<<=1;
-            ForkJoinPool pool = new ForkJoinPool(cores);
             var random = new Random(69);
 
             Long totalTime = 0L;
@@ -33,6 +33,8 @@ public class MergeSort_small_n_loop_experiment {
             }
             long average = totalTime / testsPerStep;
             System.out.println(step + ";" + n + ";" + totalTime + ";" + average);
+
         }
+        pool.close();
     }
 }
