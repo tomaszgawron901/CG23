@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 
 import Handins.Project1_ParallelMergeSort.src.BaseParallelMergeSort;
+import Handins.Project1_ParallelMergeSort.src.FullyParallelMergeSort;
 
 public class MergeSort_small_n_loop_experiment {
     public static void main(String[] args) throws Exception {
@@ -25,6 +26,7 @@ public class MergeSort_small_n_loop_experiment {
             for(int i = 0; i < testsPerStep; i++) {
                 List<Long> array = Arrays.asList(Helpers.GenerateUniqueArray(n, random::nextLong));
                 var task = new BaseParallelMergeSort(array);
+                //var task = new FullyParallelMergeSort(array);
                 long start = System.currentTimeMillis();
                 pool.invoke(task);
                 task.join();
