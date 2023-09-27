@@ -22,7 +22,7 @@ public class MergeSort_p_loop_experiment {
                 
                 long totalTime = 0;
                 for(int i = 0; i < testsPerStep; i++) {
-                    List<Long> array = Arrays.asList(Helpers.GenerateArray(n, random::nextLong));
+                    List<Long> array = Arrays.asList(Helpers.GenerateUniqueArray(n, random::nextLong));
                     var task = new BaseParallelMergeSort(array);
                     long start = System.currentTimeMillis();
                     pool.invoke(task);
