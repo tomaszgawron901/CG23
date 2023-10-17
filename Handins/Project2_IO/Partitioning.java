@@ -10,32 +10,38 @@ public class Partitioning {
         final int H = 4;  // number of wraps
         final int B = 8;  // block size
         final int L = 8;  // track length
-
         final int N = H*B*L;
-
+        final int M = B*8;  // memory size
         final int p = 5_000;  // partition point
 
-        var tape = GetRandomTape(H, B, L);
-
-        int M = B*8;
+        var tape = GetRandomTape(N, B);
         var memory = new Integer[M];
 
-        int clp = 0;  // checked lower pointer
-        int cup = N/B - 1;  // checked upper pointer
+        int clp = 0;  // checked lower block pointer
+        int cup = N/B - 1;  // checked upper block pointer
 
         while (clp <= cup) {
+            // load M-B elements from the beginning of the tape to the memory
+            // keep one empty block (of size B) in memory for future reads
             int readBlocks = 0;
             for (int m = 0; m < M-B && clp <= cup; m+=B) {
                 tape.MoveToBlock(clp+readBlocks);
-                WriteTo(memory, m, tape.readCurrent());
+                WriteTo(memory, m, tape.ReadBlock());
                 readBlocks++;
             }
             clp += readBlocks;
 
-            for(int m = 0; clp <= cup;) {
-                tape.MoveToBlock(cup);
-                WriteTo(memory, M-B, tape.readCurrent());
 
+            // swap elements greater then p from memory up to last block with element smaller then p from last memory block
+            // swap elements greater then p from memory with elements smaller then p from the tape
+            for(int m = 0; clp <= cup; cup--) {
+                // move to the end of the tape
+                // read B elements from the tape to last memory block
+                tape.MoveToBlock(cup);
+                WriteTo(memory, M-B, tape.ReadBlock());
+
+                // swap elements greater then p from memory up to last block with element smaller then p from last memory block
+                // repeat until 
                 for (int i = M-B; i < M && m < readBlocks*B; i++) {
                     if(memory[i] < p) {
                         for (;m < M-B; m++) {
@@ -46,12 +52,12 @@ public class Partitioning {
                         }
                     }
                 }
-                tape.WriteCurrent(PopRange(memory, M-B, M));
+                tape.WriteBlock(PopRange(memory, M-B, M));
 
                 if(m >= M-B) break;
-                cup--;
             }
             
+
             if(clp >= cup) {
                 for (int i = 0, j = readBlocks*B-1; i < j; i++) {
                     if(memory[i] > p) {
@@ -67,7 +73,7 @@ public class Partitioning {
 
             for (int i = 0; i < readBlocks; i++) {
                 tape.MoveToBlock(clp-readBlocks+i);
-                tape.WriteCurrent(PopRange(memory, i*B, i*B+B));
+                tape.WriteBlock(PopRange(memory, i*B, i*B+B));
             }
         }
 
@@ -92,18 +98,14 @@ public class Partitioning {
         System.out.println();
     }
 
-    private static TapeSimulator<Integer> GetRandomTape(int noWraps, int wrapHeight, int trackLength) {
+    private static SimpleTape<Integer> GetRandomTape(int N, int B) {
         var random = new Random();
 
-        Integer[][][] tape = new Integer[noWraps][trackLength][wrapHeight];
-        for (int i = 0; i < noWraps; i++) {
-            for (int j = 0; j < trackLength; j++) {
-                for (int k = 0; k < wrapHeight; k++) {
-                    tape[i][j][k] = random.nextInt(10_000);
-                }
-            }
+        Integer[] tape = new Integer[N];
+        for (int i = 0; i < N; i++) {
+            tape[i]= random.nextInt(10_000);
         }
-        return new TapeSimulator<Integer>(tape);
+        return new SimpleTape<Integer>(tape, B);
     }
 
     private static final <T> void WriteTo(T[] destination, int index, T[] values) {
