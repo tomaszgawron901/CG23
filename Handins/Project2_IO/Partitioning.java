@@ -4,47 +4,34 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class Partitioning {
-    
-
     public static void main(String[] args) {
         final int H = 4;  // number of wraps
         final int B = 8;  // block size
         final int L = 8;  // track length
         final int N = H*B*L;
-        final int M = B*8;  // memory size
+        final int M = B*4;  // memory size
         final int p = 5_000;  // partition point
 
-        var tape = GetRandomTape(N, B);
+        var tape = GetRandomTape(N);
         var memory = new Integer[M];
 
-        int clp = 0;  // checked lower block pointer
-        int cup = N/B - 1;  // checked upper block pointer
+        int clp = 0;  // lower block pointer;
+        int cup = N;  // upper block pointer;
 
-        while (clp <= cup) {
-            // load M-B elements from the beginning of the tape to the memory
-            // keep one empty block (of size B) in memory for future reads
-            int readBlocks = 0;
-            for (int m = 0; m < M-B && clp <= cup; m+=B) {
-                tape.MoveToBlock(clp+readBlocks);
-                WriteTo(memory, m, tape.ReadBlock());
-                readBlocks++;
-            }
-            clp += readBlocks;
+        while (clp < cup) {
+            tape.MoveToIndex(clp);
+            int readElements1 = Math.min(M-B, cup-clp);
+            WriteTo(memory, 0, tape.ReadBlock(readElements1));
+            clp += readElements1;
 
+            for(int m = 0; clp < cup;) {
+                int readElements2 = Math.min(cup-clp, B);
+                tape.MoveToIndex(cup-readElements2);
+                WriteTo(memory, M-readElements2, tape.ReadBlock(readElements2));
 
-            // swap elements greater then p from memory up to last block with element smaller then p from last memory block
-            // swap elements greater then p from memory with elements smaller then p from the tape
-            for(int m = 0; clp <= cup; cup--) {
-                // move to the end of the tape
-                // read B elements from the tape to last memory block
-                tape.MoveToBlock(cup);
-                WriteTo(memory, M-B, tape.ReadBlock());
-
-                // swap elements greater then p from memory up to last block with element smaller then p from last memory block
-                // repeat until 
-                for (int i = M-B; i < M && m < readBlocks*B; i++) {
+                for (int i = M-readElements2; i < M && m < readElements1; i++) {
                     if(memory[i] < p) {
-                        for (;m < M-B; m++) {
+                        for (;m < readElements1; m++) {
                             if(memory[m] > p) {
                                 swap(memory, m, i);
                                 break;
@@ -53,13 +40,14 @@ public class Partitioning {
                     }
                 }
                 tape.WriteBlock(PopRange(memory, M-B, M));
-
                 if(m >= M-B) break;
+                cup -= readElements2;
             }
             
-
+            // last run might still contain unpartitioned elements in the memory
+            // so we solve it there
             if(clp >= cup) {
-                for (int i = 0, j = readBlocks*B-1; i < j; i++) {
+                for (int i = 0, j = readElements1-1; i < j; i++) {
                     if(memory[i] > p) {
                         for(; j > i; j--) {
                             if(memory[j] < p) {
@@ -71,10 +59,8 @@ public class Partitioning {
                 }
             }
 
-            for (int i = 0; i < readBlocks; i++) {
-                tape.MoveToBlock(clp-readBlocks+i);
-                tape.WriteBlock(PopRange(memory, i*B, i*B+B));
-            }
+            tape.MoveToIndex(clp-readElements1);
+            tape.WriteBlock(PopRange(memory, 0, readElements1));
         }
 
         PrintTape(tape, p);
@@ -98,14 +84,14 @@ public class Partitioning {
         System.out.println();
     }
 
-    private static SimpleTape<Integer> GetRandomTape(int N, int B) {
+    private static SuperSimpleTape<Integer> GetRandomTape(int N) {
         var random = new Random();
 
         Integer[] tape = new Integer[N];
         for (int i = 0; i < N; i++) {
             tape[i]= random.nextInt(10_000);
         }
-        return new SimpleTape<Integer>(tape, B);
+        return new SuperSimpleTape<Integer>(tape);
     }
 
     private static final <T> void WriteTo(T[] destination, int index, T[] values) {
