@@ -7,11 +7,11 @@ import java.util.List;
 public class MbC_CH {
 
     public static List<Point2D.Double> wrap(List<Point2D.Double> set) {
-        final int partitionIndex = randomPartition(set);
-        final var partitionPoint = set.get(partitionIndex);
+        final var verticalPartition = (set.get(0).x + set.get(1).x)/2;
+        final int partitionIndex = partition(set, verticalPartition);
 
         double[][] constrains = set.stream()
-            .map(p -> new double[] { -(p.x - partitionPoint.x), 1., -p.y })
+            .map(p -> new double[] { -(p.x - verticalPartition), 1., -p.y })
             .toArray(double[][]::new);
 
         
@@ -57,20 +57,5 @@ public class MbC_CH {
         }
 
         return j;
-    }
-
-    private static int randomPartition(List<Point2D.Double> set) {
-        final int n = set.size();
-        final var partitionPoint = set.get(n-1);
-        int partitionIndex = partition(set, partitionPoint.x);
-
-        set.set(n-1, set.get(partitionIndex));
-        set.set(partitionIndex, partitionPoint);
-
-        return partitionIndex;
-    }
-
-    private static double[] dualityTransform(Point2D.Double point, double alignX) {
-        return new double[] { -(point.x - alignX), 1., -point.y };
     }
 }
