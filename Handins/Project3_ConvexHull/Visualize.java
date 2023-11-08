@@ -1,59 +1,26 @@
-package Excercises.d2ch;
+package Handins.Project3_ConvexHull;
 
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.geom.Point2D.Double;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.swing.JFrame;
 
-public class GiftWrapping {
-    public static ArrayList<Double> wrap(Double[] array) {
-        final int n = array.length;
-        final ArrayList<Double> output = new ArrayList<Double>();
-
-        var lm = getLeftMostPointIndex(array);
-
-        var p = lm;
-        do {
-            output.add(array[p]);
-
-            var q = (p+1)%n; // could be just 1 but this way we handle sets with length of 2
-            for (int i = 0; i < n; i++) {
-                if (Task1.GetOrientation_1(array[p], array[q], array[i]) >= 0F) {
-                    q = i;
-                }
-            }
-            p = q;
-
-        } while (lm != p);
-
-
-        return output;
-    }
-
-    private static int getLeftMostPointIndex(Double[] array) {
-        var mostLeft = 0;
-        for(int i=1; i < array.length; i++ ) {
-            if (array[i].x < array[mostLeft].x) {
-                mostLeft = i;
-            }
-        }
-        return mostLeft;
-    }
-
-    
-    public static void main(String[] args) {
+public class Visualize {
+    public static void main(String[] args) throws InterruptedException {
         final var random = new Random();
 
-        final int n = 100;
+        final int n = 4;
         Double[] points = new Double[n];
         for (int i = 0; i < n; i++) {
             points[i] = new Double(random.nextDouble(), random.nextDouble());
         }
         
-        var out = wrap(points);
+        //var out = INC_CH.wrap(points);
+        //var out = GIFT_CH.wrap(points);
+        var out = MbC_CH.wrap(Arrays.asList(points));
 
         for (Double point : out) {
             System.out.println(point);
@@ -66,6 +33,8 @@ public class GiftWrapping {
         frame.setLocation(200, 200);  
         frame.setVisible(true);
         frame.setBackground(Color.white);
+
+        Thread.sleep(10);
 
         var grf =  (Graphics2D)frame.getGraphics();
         grf.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); 
