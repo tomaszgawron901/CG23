@@ -7,42 +7,31 @@ import java.util.List;
 public class MbC_CH {
 
     public static List<Point2D.Double> wrap(List<Point2D.Double> set) {
-        final var verticalPartition = (set.get(0).x + set.get(1).x)/2;
+        final double verticalPartition = (set.get(0).x + set.get(1).x)/2;
+
         final int partitionIndex = partition(set, verticalPartition);
-
-        double[][] constrains = set.stream()
-            .map(p -> new double[] { -(p.x - verticalPartition), 1., -p.y })
-            .toArray(double[][]::new);
-
-        
-        String s = "";
-        for (double[] ds : constrains) {
-            s += String.format("%,.4f", ds[0]) + "*x + y <= " + String.format("%,.4f", ds[2]) + ", ";
-        }
-        System.out.println(s);
-
-        try {
-            var aaa = LinearProgramming.maximizeY_2D(constrains);
-            int a = 0;
-        }
-        catch(Exception e) {
-        }
+        var lpOutput = LinearProgramming.minimize2D(verticalPartition, set);
         
 
+        //Arrays.sort(lpOutput.index);
+        var bridgeStart = set.get(lpOutput.index[0]);
+        var bridgeEnd = set.get(lpOutput.index[1]);
+        
+        int a = 0;
 
+        //var leftHull = wrap(set);
+        //var rightHull = wrap(set);
 
-        var leftHull = wrap(set);
-        var rightHull = wrap(set);
-
-        leftHull.add(null);
-        leftHull.addAll(rightHull);
-        return leftHull;
+        //leftHull.add(null);
+        //leftHull.addAll(rightHull);
+        //return leftHull;
+        return Arrays.asList(bridgeStart, bridgeEnd);
     }
 
     private static int partition(List<Point2D.Double> set, double partition) {
         final int n = set.size();
         int i = 0;
-        int j = n-1;
+        int j = n;
 
         while (i < j) {
             final var point = set.get(i);
