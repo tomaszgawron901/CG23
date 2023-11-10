@@ -1,12 +1,12 @@
 package Handins.Project3_ConvexHull;
 
 import java.awt.geom.Point2D;
-import java.util.List;
 
 public class LinearProgramming {
-
-    private static final double LARGE_NUMBER = 10_000.0;
-
+    // TODO: replace it with Double.POSITIVE_INFINITY
+    // and update if(bounds[i].x*v.x < bounds[i].y - v.y) so it works correctly with infinities
+    private static final double LARGE_NUMBER = 1_000_000_000.0;
+    
     public static class Pair<T1, T2> {
         public T1 value;
         public T2 index;
@@ -47,35 +47,33 @@ public class LinearProgramming {
      * Solve 2D minimization linear programming problem for c*x + y while having given bounds 
      * @param c
      * @param bounds - list of bounds: bounds[i].x*x + y >= bounds[i].y
-     * @return Solution of the lp problem and indexes of two bounds on which intersection the solution lies on
+     * @return Two bounds on which intersection the solution lies on
      */
-    public static Pair<Point2D.Double, Integer[]> minimize2D(double c, List<Point2D.Double> bounds) {
+    public static Point2D.Double[] minimize2D(double c, Point2D.Double[] bounds) {
         Point2D.Double v = new Point2D.Double(-LARGE_NUMBER*c, -LARGE_NUMBER);
         var optimalBoundIds = new Integer[2];
-        for(int i = 0 ; i < bounds.size(); i++) {
-            var b_i = bounds.get(i);
-            if(b_i.x*v.x < b_i.y - v.y)  // bound violates v
+        for(int i = 0 ; i < bounds.length; i++) {
+            if(bounds[i].x*v.x < bounds[i].y - v.y)  // bound violates v
             {
                 // map 2d boundaries into 1d boundaries
                 var bounds1D = new double[i][2];
                 for(int j = 0; j < i; j++) {
-                    var b_j = bounds.get(j);
                     bounds1D[j] = new double[]{
-                        b_i.x - b_j.x,
-                        b_i.y - b_j.y,
+                        bounds[i].x - bounds[j].x,
+                        bounds[i].y - bounds[j].y,
                     };
                 }
 
-                var c1D = c - b_i.x;
+                var c1D = c - bounds[i].x;
                 var output1D = minimize1D(c1D, bounds1D);
                 optimalBoundIds = new Integer[] {output1D.index, i};
                 v.x= output1D.value;
-                v.y = (-b_i.x*v.x+ b_i.y);
+                v.y = (-bounds[i].x*v.x+ bounds[i].y);
             }
 
         }
 
-        return new Pair<Point2D.Double,Integer[]>(v, optimalBoundIds);
+        return new Point2D.Double[] {bounds[optimalBoundIds[0]], bounds[optimalBoundIds[1]]};
     }
 
 
