@@ -4,6 +4,9 @@ import java.awt.geom.Point2D;
 import java.util.List;
 
 public class LinearProgramming {
+
+    private static final double LARGE_NUMBER = 10_000.0;
+
     public static class Pair<T1, T2> {
         public T1 value;
         public T2 index;
@@ -19,7 +22,7 @@ public class LinearProgramming {
      * @param bounds - array of bounds: bounds[i][0] * x <= bounds[i][1]
      */
     public static Pair<Double, Integer> minimize1D(double c, double[][] bounds) {
-        double optimalValue = Double.NEGATIVE_INFINITY*c;
+        double optimalValue = -LARGE_NUMBER*c;
         Integer boundIndex = null;
         for (int i = 0; i < bounds.length; i++) {
             double a = bounds[i][0];
@@ -47,11 +50,11 @@ public class LinearProgramming {
      * @return Solution of the lp problem and indexes of two bounds on which intersection the solution lies on
      */
     public static Pair<Point2D.Double, Integer[]> minimize2D(double c, List<Point2D.Double> bounds) {
-        Point2D.Double v = new Point2D.Double(Float.NEGATIVE_INFINITY*c, Double.NEGATIVE_INFINITY);
+        Point2D.Double v = new Point2D.Double(-LARGE_NUMBER*c, -LARGE_NUMBER);
         var optimalBoundIds = new Integer[2];
         for(int i = 0 ; i < bounds.size(); i++) {
             var b_i = bounds.get(i);
-            if(b_i.x*v.x <= b_i.y - v.y)  // bound violates v
+            if(b_i.x*v.x < b_i.y - v.y)  // bound violates v
             {
                 // map 2d boundaries into 1d boundaries
                 var bounds1D = new double[i][2];
@@ -66,10 +69,8 @@ public class LinearProgramming {
                 var c1D = c - b_i.x;
                 var output1D = minimize1D(c1D, bounds1D);
                 optimalBoundIds = new Integer[] {output1D.index, i};
-                var min_x = output1D.value;
-                var min_y = (-b_i.x*min_x + b_i.y);
-                v.x = min_x;
-                v.y = min_y;
+                v.x= output1D.value;
+                v.y = (-b_i.x*v.x+ b_i.y);
             }
 
         }
