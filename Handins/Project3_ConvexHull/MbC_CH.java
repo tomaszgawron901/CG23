@@ -11,7 +11,23 @@ public class MbC_CH {
         return Double.compare(p1.x, p2.x);
     }
 
+    private static void InvertIndexes(Point2D.Double[] set) {
+        for (Point2D.Double point : set) {
+            point.y = -point.y;
+            point.x = -point.x;
+        }
+    }
+
     public static List<Point2D.Double> wrap(Point2D.Double[] set) {
+        var upperHull = upperHull(set);
+        InvertIndexes(set);
+        var lowerHull = upperHull(set);
+        InvertIndexes(set);
+
+        return Stream.concat(upperHull.stream(), lowerHull.stream()).toList();
+    }
+
+    private static List<Point2D.Double> upperHull(Point2D.Double[] set) {
         if (set.length < 3) {
             Arrays.sort(set, MbC_CH::CompareX);
             return Arrays.asList(set);
@@ -24,12 +40,12 @@ public class MbC_CH {
         var bridgeStart = bride[0];
         var bridgeEnd = bride[1];
 
-        var leftHull = wrap(Arrays.stream(set)
+        var leftHull = upperHull(Arrays.stream(set)
             .filter(p -> p.x < bridgeStart.x || p == bridgeStart)
             .toArray(Point2D.Double[]::new)
         );
 
-        var rightHull = wrap(Arrays.stream(set)
+        var rightHull = upperHull(Arrays.stream(set)
             .filter(p -> p.x > bridgeEnd.x || p == bridgeEnd)
             .toArray(Point2D.Double[]::new)
         );
